@@ -7,25 +7,32 @@
  */
 function int2binary($number) {
 
-	$positive_number = abs($number);
-	
-	if ($positive_number == 0) {
+	if ($number == 0) {
 		return 0;
 	}
 
-	$binary_string = "";
-
-	/*
-	 * Getting the remainders of the division by two
-	 * and adding them in reverse order into $binary_string
-	 */
-	while ($positive_number != 0) {
-
-		$value = $positive_number % 2;
-		$binary_string = $value . $binary_string;
-		$positive_number = floor($positive_number / 2);
+	$result_string = "";
+	
+	for($i = 0; $i < (PHP_INT_SIZE * 8); ++$i) {
+		/**
+		 * Using right shift ">>" and operator "&" 32-64 times 
+		 * to get the bits from every 32-64 bit integer
+		 * depending from PHP_INT_SIZE
+		 */
+		$bit = ($number >> $i) & 1;
+		/**
+		 * Appending every $bit value as a string 
+		 * in the beginning of the $result_string
+		 */
+		$result_string = $bit . $result_string;
 	}
-	return $binary_string;
+	/**
+	 * Get rid of all zeros in the left
+	 */
+	$result_string = ltrim($result_string, "0");
+
+	
+	return $result_string;
 }
 
 if (defined('STDIN')) {
