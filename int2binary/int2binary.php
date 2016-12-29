@@ -7,39 +7,24 @@
  */
 function int2binary($number) {
 
-	if ($number < 0) {
-		echo "Doesn't work with negative numbers.";
-		exit;
-	}
-
-	if ($number == 0) {
+	$positive_number = abs($number);
+	
+	if ($positive_number == 0) {
 		return 0;
 	}
 
 	$binary_string = "";
-	$binary_values = array();
 
 	/*
 	 * Getting the remainders of the division by two
-	 * in reverse order and pushing them into an array
+	 * and adding them in reverse order into $binary_string
 	 */
-	while ($number != 0) {
+	while ($positive_number != 0) {
 
-		$value = $number % 2;
-		array_push($binary_values, $value);
-		$number = floor($number / 2);
+		$value = $positive_number % 2;
+		$binary_string = $value . $binary_string;
+		$positive_number = floor($positive_number / 2);
 	}
-
-	/*
-	 * Popping values from the back of the array
-	 * and adding them into a string
-	 * which reverses the order of values into the right direction
-	 */
-	while (count($binary_values)) {
-
-		$binary_string .= array_pop($binary_values);
-	}
-
 	return $binary_string;
 }
 
