@@ -1,5 +1,4 @@
 <?php
-
 class Source {
 
 	public $path;
@@ -9,7 +8,7 @@ class Source {
 
 	/**
 	 * @param string $path - 'system_path/file_name'|'mysql:host={HOST};dbname={DBNAME}'
-	 * @param string  $type - 'xml'|'txt'|'db'
+	 * @param string  $type - 'xml'|'json'|'txt'|'db'
 	 * @param boolean $enabled - true|false
 	 * @param array $auth - array('host'[optional], 'name'[optional], 'user', 'pass')
 	 */
@@ -56,11 +55,14 @@ $sources = array();
  */
 $sources[] = new Source('quotes.xml', 'xml', true);
 $sources[] = new Source('quotes.txt', 'txt', true);
+$sources[] = new Source('quotes.json', 'json', true);
 $sources[] = new Source('mysql:host=localhost;dbname=quotes', 'db', true, $db);
 
 $quotes = array();
 
 $q = isset($_GET['q']) ? $_GET['q'] : null;
+
+$err_msg = array();
 
 /*
  * Retrieve quotes from Sources
@@ -79,7 +81,25 @@ if (!empty($sources)) {
 							}
 						}
 					} else {
-						echo "XML Source - input error\n";
+						$err_msg[] = "XML Source - input error";
+					}
+					break;
+
+				case 'json':
+					$json_str = file_get_contents($source->path);
+					if ($json_str !== false) {
+						$json = json_decode($json_str);
+						if ($json !== null) {
+							foreach ($json->quotes as $quote) {
+								if ($quote->text) {
+									$quotes[] = new Quote($quote->text, $quote->author);
+								}
+							}
+						} else {
+							$err_msg[] = "JSON Source - wrong format";
+						}
+					} else {
+						$err_msg[] = "JSON Source - can't read file '" . $source->path;
 					}
 					break;
 
@@ -95,7 +115,7 @@ if (!empty($sources)) {
 							}
 						}
 					} else {
-						echo "TXT Source - can't read file '" . $source->path . "'\n";
+						$err_msg[] = "TXT Source - can't read file '" . $source->path;
 					}
 					break;
 
@@ -103,7 +123,7 @@ if (!empty($sources)) {
 					try {
 						$dbh = new PDO($source->path . ";charset=utf8", $source->auth['user'], $source->auth['pass']);
 						$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-						$query = "SELECT * from quote";
+						$query = "SELECT * FROM quote";
 						$sth = $dbh->prepare($query);
 						$sth->execute();
 						$quotes_db = $sth->fetchAll();
@@ -113,17 +133,17 @@ if (!empty($sources)) {
 							}
 						}
 					} catch (PDOException $Exception) {
-						echo "DB Source - input error\n";
+						$err_msg[] = "DB Source - input error";
 					}
 					break;
 
 				default:
-					echo "Uknown source type for '" . $source->path . "'\n";
+					$err_msg[] = "Uknown source type for '" . $source->path;
 			}
 		}
 	}
 } else {
-	echo "No Sources to pick names from\n";
+	$err_msg[] = "No Sources to pick names from";
 }
 
 /*
@@ -145,11 +165,10 @@ if (!empty($quotes) && shuffle($quotes)) {
 	}
 
 } else {
-	echo "Could generate random quotes";
+	$err_msg[] = "Could generate random quotes";
 }
 
 ?>
-
 <!DOCTYPE html>
 <html>
 	<head>
@@ -157,8 +176,14 @@ if (!empty($quotes) && shuffle($quotes)) {
 		<title>Fortune - Quotes</title>
 	</head>
 	<body>
+<?php
+	foreach ($err_msg as $msg) {
+?>
+		<p class="error"><?=$msg?></p>
+<?php
+	}
+?>
 		<ul id="quotes">
-
 <?php
 	/*
 	 * Output quites
@@ -166,30 +191,27 @@ if (!empty($quotes) && shuffle($quotes)) {
 	if ($quotes) {
 		if ($q == "*all*") {
 			foreach($quotes as $key => $quote) {
-				?>
-
+?>
 			<li class="quote">
-				<?=$quote->text?>
-				<?php if($quote->author) { ?>
+				<span><?=$quote->text?></span>
+<?php if($quote->author) { ?>
 				<i class="author"> - <?=$quote->author?></i>
-				<?php } ?>
+<?php } ?>
 			</li>
-				<?php
+<?php
 			}
 		} elseif ($random_quote) {
-				?>
-
+?>
 			<li class="quote">
-				<?=$random_quote->text?>
-				<?php if($random_quote->author) { ?>
+				<span><?=$random_quote->text?></span>
+<?php if($random_quote->author) { ?>
 				<i class="author"> - <?=$random_quote->author?></i>
-				<?php } ?>
+<?php } ?>
 			</li>
-				<?php
+<?php
 		}
 	}
 ?>
-
-		</div>
+		</ul>
 	</body>
 </html>
