@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE list [
+<!ELEMENT list (name*)>
+<!ELEMENT name (#PCDATA)>
+]>
+<list>
+	<name>Boyan</name>
+	<name>Ivan</name>
+	<name>Asen</name>
+	<name>Petur</name>
+	<name>Ina</name>
+	<name>Irina</name>
+	<name>Neri</name>
+	<name>Iliana</name>
+	<name>Dancho</name>
+	<name>Silvia</name>
+	<name>Boncho</name>
+	<name>Natalia</name>
+	<name>Uri</name>
+	<name>Nikolai</name>
+	<name>Atanas</name>
+	<name>Spas</name>
+</list>
