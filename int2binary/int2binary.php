@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Converts positive decimal number to binary string
+ * Converts a decimal number to binary string
+ * - has identical output to decbin() and sprintf()
  * @param int $number
  * @return string
  */
